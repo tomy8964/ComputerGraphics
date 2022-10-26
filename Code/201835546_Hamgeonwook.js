@@ -87,38 +87,38 @@ window.onload = function init()
 		// if click play button
 		if (t[0] <= 0.0 && t[0] >= -1.0 && t[1] <= 0.0 && t[1] >= -1.0)
 		{
-			//
-			const loader = new THREE.GLTFLoader();
+			// //
+			// const loader = new THREE.GLTFLoader();
 			
-			//scene1 load
-			var car = loader.load('./car/scene.gltf', function(gltf){
-				car = gltf.scene.children[0];
-				car.scale.set(50,50,50);
-				car.position.set(0,0,0);
-				scene.add(gltf.scene);
-			  }, undefined, function (error) {
-				  console.error(error);
-			});
+			// //scene1 load
+			// var car = loader.load('./car/scene.gltf', function(gltf){
+			// 	car = gltf.scene.children[0];
+			// 	car.scale.set(50,50,50);
+			// 	car.position.set(0,0,0);
+			// 	scene.add(gltf.scene);
+			//   }, undefined, function (error) {
+			// 	  console.error(error);
+			// });
 
-			render1();
+			// render1();
 
-			//canvas.addEventListener("mousedown",secondClickEvent, false);
+			// //canvas.addEventListener("mousedown",secondClickEvent, false);
 		}
 		else if(t[0] >= 0.0 && t[0] <= 1.0 && t[1] <= 0.0 && t[1] >= -1.0)
 		{
-			const loader = new THREE.GLTFLoader();
+			// const loader = new THREE.GLTFLoader();
 			
-			//scene2 load
-			var ironman = loader.load('./iron_man/scene.gltf', function(gltf){
-				ironman = gltf.scene.children[0];
-				ironman.scale.set(5000,5000,5000);
-				ironman.position.set(0,0,0);
-				scene.add(gltf.scene);
-				}, undefined, function (error) {
-					console.error(error);
-			});
+			// //scene2 load
+			// var ironman = loader.load('./iron_man/scene.gltf', function(gltf){
+			// 	ironman = gltf.scene.children[0];
+			// 	ironman.scale.set(5000,5000,5000);
+			// 	ironman.position.set(0,0,0);
+			// 	scene.add(gltf.scene);
+			// 	}, undefined, function (error) {
+			// 		console.error(error);
+			// });
 
-			render2();
+			// render2();
 		}
 		else if(t[0] >= 0.0 && t[0] <= 1.0 && t[1] >= 0.0 && t[1] <= 1.0)
 		{
@@ -133,7 +133,7 @@ window.onload = function init()
 			gl.uniform4f(vColor,0.6,0.2,0.0,1.0);	
 			
 			// Draw the independent square
-			gl.enableVertexAttribArray( vPosition ); // For the triangle we want to use per-vertex color so we enable the vertexColorAttribute again
+			gl.enableVertexAttribArray( vPosition ); 
 			gl.drawArrays(gl.TRIANGLES, 0, 12);
 
 			canvas.addEventListener("mousedown", function(event){
@@ -155,11 +155,27 @@ window.onload = function init()
 		
 					render1();
 				}
+				else if(t[0] >= 0.0 && t[0] <= 1.0 && t[1] <= 0.0 && t[1] >= -1.0)
+				{
+					const loader = new THREE.GLTFLoader();
+					
+					//scene2 load
+					var ironman = loader.load('./iron_man/scene.gltf', function(gltf){
+						ironman = gltf.scene.children[0];
+						ironman.scale.set(5000,5000,5000);
+						ironman.position.set(0,0,0);
+						scene.add(gltf.scene);
+						}, undefined, function (error) {
+							console.error(error);
+					});
+
+					render2();
+				}
+						else ;
+					},{once:true});
+				
+				}
 				else ;
-			},{once:true});
-		
-		}
-		else ;
 	},{once:true});
 
 	const renderer = new THREE.WebGLRenderer({canvas});
