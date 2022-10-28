@@ -1,111 +1,86 @@
 var canvas;
 var gl;
 var program;
-var redraw = false;
-var index = 0;
-var line =[];
-var pointsArray = new Float32Array([0,0.5,
-                    0.5,-0.32,
-                    0.5,-0.32,
-                    -0.5,-0.32,
-                    -0.5,-0.32,
-                    0,0.5,
-                    0,0.6,
-                    0.6,-0.37,
-                    0.6,-0.37,
-                    -0.6,-0.37,
-                    -0.6,-0.37,
-                    0,0.6]);
+
+var scene;
+var renderer;
+var loader = new THREE.GLTFLoader();
+var check =false;
+var camera;
+
+raycaster = new THREE.Raycaster();
+mouse = new THREE.Vector2();
+
+const dalgona=[
+    loadRec(1),
+    loadRec(2),
+    loadRec(3),
+    loadRec(4),
+    loadRec(5),
+    loadRec(6),
+    loadRec(7),
+    loadRec(9),
+    loadRec(10)
+];
 
 window.onload = function init(){
-    canvas = document.getElementById( "gl-canvas" );
-    gl = WebGLUtils.setupWebGL( canvas );
-    if ( !gl ) { alert( "WebGL isn't available" ); }
+	const canvas = document.getElementById( "gl-canvas" );
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
 
-    gl.viewport( 0, 0, canvas.width, canvas.height );
-    gl.clearColor( 1.0, 1.0, 1.0, 1.0 );
+	renderer = new THREE.WebGLRenderer({canvas});
+	renderer.setSize(canvas.width,canvas.height);
+    renderer.domElement.addEventListener('click', onClick, false);
 
-    program = initShaders( gl, "vertex-shader", "fragment-shader" );
-    gl.useProgram( program );
+	scene = new THREE.Scene();
+	scene.background = new THREE.Color(0x000000);
 
-    canvas.addEventListener("mousedown",function(event){
-        redraw = true;
-    })
 
-    canvas.addEventListener("mouseup",function(event){
-        redraw = false;
-    })
+	camera = new THREE.PerspectiveCamera(75,canvas.width / canvas.height,0.1, 100);
+	camera.position.y = 30;
+    camera.rotation.x = -1.5;
 
-    canvas.addEventListener("mousemove",function(event){
-        if(redraw){
-            var x = 2*event.clientX/canvas.width-1-0.025;
-            var y = 2*(canvas.height-event.clientY)/canvas.height-1+0.025;
-            if(x==0){
-                if(((0.5<y&&y<0.6)||(-0.37<y&&y<-0.32))||(-0.37<y&&y<-0.32))moveAccepted(x,y);
-		        else moveRejected();
-            }else if(x<0){
-                if((1.64*x+0.5<y&&y<1.64*x+0.6)||(-0.37<y&&y<-0.32))moveAccepted(x,y);
-		        else moveRejected();
-            }else if(x>0){
-                if(((-1.64)*x+0.5<y&&y<(-1.64)*x+0.6)||(-0.37<y&&y<-0.32))moveAccepted(x,y);
-		        else moveRejected();
-            }
-            if(isWin()){
-                alert("you win!");
-                line=[];
-                index=0;		 
-	            redraw = false;
-            }
-        }
-    })
-    render();
-};
+	hlight = new THREE.AmbientLight (0x404040,10);
+	scene.add(hlight);
+    
+    const controls = new THREE.OrbitControls( camera, renderer.domElement );
+    controls.update();
 
-function moveAccepted(x,y){
-    index++;
-    line.push(x,y);
+    animate();
 }
 
-function moveRejected(){
-    alert("ouch!");
-    line=[];
-    index=0;        
-    redraw = false;
+function animate(time) {
+    time *= 0.001;
+    renderer.render(scene,camera);
+    requestAnimationFrame(animate);
 }
 
-function isWin(){
-    if(line.length>20){
-        if(Math.sqrt(Math.pow((line[0]-line[index*2-2]),2)+Math.pow((line[1]-line[index*2-1]),2))<=0.008)
-            return true;
+function loadRec(num){
+    var url = '../Graphic/model/rec*.gltf'
+	    loader.load(url.replace('*',String(num)), function(gltf){
+	        gltf.scene.children[0].scale.set(10,10,10);
+	        scene.add(gltf.scene);
+            if(num<8)dalgona[num-1]=gltf;
+            else dalgona[num-2]=gltf;
+            if(num==10)check = true;
+	    },  undefined, function (error) {
+            console.log(error);
+	});
+}
+
+function onClick() {
+    event.preventDefault();
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    var intersects = raycaster.intersectObjects(scene.children, true);
+    if (intersects.length > 0) {
+        console.log('Intersection:', intersects[0]);
+        clicked = new THREE.Vector3(intersects[0].point.x,intersects[0].point.y,intersects[0].point.z);
+        cameraVecter = new THREE.Vector3(camera.position.x,camera.position.y,camera.position.z);
+        vectorToMove = clicked.sub(cameraVecter).normalize();
+        objectToMove = intersects[0].object;
+        objectToMove.position.add(vectorToMove);
     }
-    return false;
 }
 
-function render()
-{
-    gl.clear( gl.COLOR_BUFFER_BIT);
-
-    var vBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, pointsArray, gl.STATIC_DRAW );
-    
-    var vPosition = gl.getAttribLocation( program, "vPosition" );
-    gl.vertexAttribPointer( vPosition, 2, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vPosition );
-
-    gl.uniform4f(gl.getUniformLocation(program,"vColor"),1,0,0,1);
-    gl.drawArrays( gl.LINES, 0, 12 );
-
-    var vBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(line), gl.STATIC_DRAW );
-    
-    var vPosition = gl.getAttribLocation( program, "vPosition" );
-    gl.vertexAttribPointer( vPosition, 2, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vPosition );
-
-    gl.uniform4f(gl.getUniformLocation(program,"vColor"),1,0,0,1);
-    gl.drawArrays( gl.LINE_STRIP, 0, index );
-
-    window.requestAnimationFrame(render);
-}
