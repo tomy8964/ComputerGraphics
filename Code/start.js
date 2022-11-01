@@ -19,7 +19,7 @@ window.onload = function init()
 			const loader = new THREE.GLTFLoader();
 			
 			//scene2 load
-			var ball = loader.load('./model/sugar3Text.gltf', function (gltf) {
+			var ball = loader.load('../Graphic/model/sugar3Text.gltf', function (gltf) {
 				ball = gltf.scene;
 				ball.scale.set(25, 25, 25);
 				scene2.add(gltf.scene);
@@ -29,9 +29,27 @@ window.onload = function init()
 			});
 
 			render1();
+
+			canvas.addEventListener("mousedown", function(event){
+				var t = vec2(2*event.clientX/canvas.width-1, 2*(canvas.height-event.clientY)/canvas.height-1);
+				// if click play button
+				if (t[0] <= 0.23 && t[0] >= -0.217 && t[1] <= 0.51 && t[1] >= 0.0615)
+				{
+					const loader = new THREE.GLTFLoader();
+				}
+				else if(t[0] <= -0.115 && t[0] >= -0.529 && t[1] <= -0.22 && t[1] >= -0.68)
+				{
+					const loader = new THREE.GLTFLoader();
+				}
+				else if(t[0] <= 0.618 && t[0] >= 0.273 && t[1] <= -0.29 && t[1] >= -0.654)
+				{
+					const loader = new THREE.GLTFLoader();
+				}
+				else ;
+			},{once:true});
 		}
 		else ;
-		},{once:true});
+	},{once:true});
 
 	const renderer = new THREE.WebGLRenderer({ canvas });
     renderer.setSize(canvas.width, canvas.height);
